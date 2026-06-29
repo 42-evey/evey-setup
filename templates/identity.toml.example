@@ -1,0 +1,32 @@
+# identity.toml.example — fully commented target identity template for customization.
+# Usage:
+#   cp identity.toml.example identity.toml
+#   edit values
+#   bash customize.sh --identity identity.toml
+#
+# Or let customize --human mode copy + prompt to fill.
+#
+# All fields are required for complete rename across layers.
+# Changes are recorded in .identity-ledger.json (gitignored) for --revert.
+#
+# owner.name: Title Case branding name (Evey -> "Acme Agent")
+# owner.slug: lowercase identifier (evey -> "acme") — drives dir renames evey-* -> <slug>-*,
+#             plugin.yaml name:, loggers evey.x -> <slug>.x , mqtt topics, tool evey_* -> <slug>_*
+# owner.handle: github/org handle (42-evey -> "42-acme")
+# owner.email / .domain / .donate : replace emails, domains, links case-sensitively
+# agent.peer: partner identifier (mother/Mother) — also rewrites mother_ / Mother_ prefixes consistently
+# paths.root: machine-specific base path prefix rewrite
+
+# [owner]
+# name = "Your Title Name"
+# slug = "yourslug"
+# handle = "42-yourslug"
+# email = "you@yourslug.example"
+# domain = "yourslug.example"
+# donate = "https://yourslug.example/donate.html"
+#
+# [agent]
+# peer = "partnerid"
+#
+# [paths]
+# root = "/mnt/v/yourslug"

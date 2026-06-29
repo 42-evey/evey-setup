@@ -1,0 +1,48 @@
+# Secrets
+.env
+*.env.local
+
+# Runtime data
+data/*
+!data/.gitkeep
+
+# Backups
+backups/
+
+# Ollama model files
+models/
+
+# Docker volumes
+volumes/
+
+# Node modules (n8n, etc.)
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Hermes agent session data
+data/hermes/sessions/
+data/hermes/checkpoints/
+data/hermes/cron/output/
+
+# Keep config templates
+!config/
+!templates/

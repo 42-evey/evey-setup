@@ -1,0 +1,17 @@
+# identity.seed.toml — canonical Evey snapshot (do not edit)
+# This is the source of truth for SCAN tokens and VERIFY.
+# All case variants of these tokens are matched by the engine.
+
+[owner]
+name = "Evey"
+slug = "evey"
+handle = "42-evey"
+email = "evey@evey.cc"
+domain = "evey.cc"
+donate = "https://evey.cc/donate.html"
+
+[agent]
+peer = "mother"
+
+[paths]
+root = "/mnt/v/evey"
