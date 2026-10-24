@@ -6,6 +6,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 echo "=== evey-setup tests ==="
 bash ./test_noninteractive.sh || FAIL=1
 bash ./test_config_schema.sh || FAIL=1
+bash ./test_compose_paths.sh || FAIL=1
 # verify test has mocks, run it
 bash ./test_verify.sh || FAIL=1
 # identity/customize engine (Task 002)
