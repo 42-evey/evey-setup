@@ -43,6 +43,9 @@ CLONE_DIR="${INSTALL_DIR}/.plugin-cache"
 YES="${YES:-0}"
 NON_INTERACTIVE="${NON_INTERACTIVE:-0}"
 PLUGINS_SPEC="${PLUGINS:-}"
+# The install dir may come first (`install-plugins.sh <dir> --plugins core`); step past it
+# so the flags after it are still read.
+if [ -n "$dir_arg" ]; then shift; fi
 while [ $# -gt 0 ]; do
   case "$1" in
     --yes|-y) YES=1; shift ;;
@@ -130,7 +133,7 @@ install_plugins_from_list() {
 
         if [ ! -d "$src" ]; then
             warn "Plugin ${name} not found in repository — skipping"
-            ((skipped++))
+            skipped=$((skipped + 1))
             continue
         fi
 
@@ -141,7 +144,8 @@ install_plugins_from_list() {
 
         cp -r "$src" "$dst"
         log "Installed ${name}"
-        ((installed++))
+        installed=$((installed + 1))
+        INSTALLED_NAMES+=("$name")
     done
 
     echo ""
@@ -160,6 +164,32 @@ clone_repo() {
         log "Cloning plugin repository..."
         rm -rf "$CLONE_DIR"
         git clone --depth 1 "$REPO_URL" "$CLONE_DIR"
+    fi
+}
+
+INSTALLED_NAMES=()
+
+# Hermes loads only plugins listed in plugins.enabled, so a copied plugin stays inert until
+# it is enabled. `hermes plugins enable` inside the container writes HERMES_HOME/config.yaml,
+# which is data/hermes/config.yaml on this side.
+enable_plugins() {
+    [ $# -gt 0 ] || return 0
+    if command -v docker &>/dev/null && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx hermes-agent; then
+        local name failed=()
+        for name in "$@"; do
+            if docker exec hermes-agent hermes plugins enable "$name" >/dev/null 2>&1; then
+                log "Enabled ${name}"
+            else
+                failed+=("$name")
+            fi
+        done
+        if [ ${#failed[@]} -gt 0 ]; then
+            warn "Could not enable: ${failed[*]}"
+            warn "Run inside the container: hermes plugins enable <name>"
+        fi
+    else
+        warn "hermes-agent is not running, so these plugins are installed but NOT enabled: $*"
+        warn "Once it is up, run for each: docker exec hermes-agent hermes plugins enable <name>"
     fi
 }
 
@@ -327,6 +357,7 @@ install_utils
 
 # Install selected plugins
 install_plugins_from_list "${UNIQUE_SELECTED[@]}"
+enable_plugins "${INSTALLED_NAMES[@]}"
 
 # Cleanup
 echo ""
@@ -337,9 +368,8 @@ echo ""
 echo "  docker compose restart hermes-agent"
 echo ""
 
-# Show what to add to config.yaml platform_toolsets
 echo -e "${BOLD}Next steps:${NC}"
 echo "  1. Restart hermes-agent to load plugins"
-echo "  2. Add plugin toolsets to config.yaml platform_toolsets if needed"
+echo "  2. Check each plugin's load state: docker exec hermes-agent hermes plugins list"
 echo "  3. Check plugin README files for configuration options"
 echo ""
